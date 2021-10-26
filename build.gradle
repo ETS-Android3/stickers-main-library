@@ -19,7 +19,7 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io'
-            credentials { "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" }
+//            credentials { "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" }
         }
     }
 }
