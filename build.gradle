@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.3'
-
+        //implementation 'com.github.User:Repo:Tag'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -18,6 +18,9 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io'
+            credentials { "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" }
+        }
     }
 }
 
