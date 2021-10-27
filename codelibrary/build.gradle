@@ -36,8 +36,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     packagingOptions {
@@ -110,6 +110,7 @@ dependencies {
     implementation "com.facebook.fresco:webpsupport:$fresco_version"
     implementation "com.facebook.fresco:animated-webp:$fresco_version"
     implementation "com.facebook.fresco:animated-base:$fresco_version"
+    implementation 'com.github.igorm705:codelibrary:master-SNAPSHOT'
     implementation 'com.github.igorm705:codelibrary:main-SNAPSHOT'
 }
 
