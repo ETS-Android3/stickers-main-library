@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 
-
 android {
     //the compression of webp file during build causes problem with FileDescriptor in ContentProvider.
     aaptOptions {
@@ -110,8 +109,7 @@ dependencies {
     implementation "com.facebook.fresco:webpsupport:$fresco_version"
     implementation "com.facebook.fresco:animated-webp:$fresco_version"
     implementation "com.facebook.fresco:animated-base:$fresco_version"
-    implementation 'com.github.igorm705:codelibrary:master-SNAPSHOT'
-    implementation 'com.github.igorm705:codelibrary:main-SNAPSHOT'
+
 }
 
 
