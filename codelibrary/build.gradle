@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish' //How to publish... by Phillip Lackner
+
 
 android {
     //the compression of webp file during build causes problem with FileDescriptor in ContentProvider.
@@ -111,5 +113,34 @@ dependencies {
     implementation "com.facebook.fresco:animated-base:$fresco_version"
 
 }
+
+//------How to Build & Publish An Android Library by Phillip Lackner
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.release
+                groupId = 'com.github.igorm705'
+                artifactId = 'stickerslibrary'
+                version = '1.1'
+
+            }
+        }
+    }
+}
+//publishing {
+//    publications {
+//        maven(MavenPublication) {
+//
+//            //groupId = 'org.gradle.sample'
+//            groupID = 'com.github.igorm705'
+//            artifactId = 'stickerslibrary'
+//            version = '1.1'
+//
+//            from components.java
+//        }
+//    }
+//}
+//
 
 
