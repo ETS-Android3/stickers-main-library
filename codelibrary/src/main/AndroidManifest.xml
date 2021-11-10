@@ -13,6 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+
         <activity
             android:name=".EntryActivity"
             android:exported="true">
@@ -50,8 +52,17 @@
             android:enabled="true"
             android:exported="true"
             android:readPermission="com.whatsapp.sticker.READ" />
-    </application>
 
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9927743566866981~1464159368"/>
+
+
+
+
+    </application>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
     <!-- to be able to query the whitelist status in WhatsApp 
      https://developer.android.com/training/basics/intents/package-visibility#package-name -->
     <queries>

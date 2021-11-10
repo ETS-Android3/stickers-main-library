@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.samplestickerapp.EntryActivity;
 
 
+
 public class MainActivity extends AppCompatActivity {
 
     private EntryActivity entryActivity;

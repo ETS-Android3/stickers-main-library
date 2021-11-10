@@ -8,7 +8,6 @@
 
 package com.example.samplestickerapp;
 
-import android.content.ContentProvider;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,6 +25,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+
+
 
 import java.lang.ref.WeakReference;
 

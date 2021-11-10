@@ -9,8 +9,6 @@
 package com.example.samplestickerapp;
 
 
-import static android.provider.Settings.System.getString;
-
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -18,7 +16,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.database.Cursor;
@@ -36,6 +33,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 public class StickerContentProvider extends ContentProvider {
 
@@ -88,11 +95,12 @@ public class StickerContentProvider extends ContentProvider {
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
 
     private List<StickerPack> stickerPackList;
+    private InterstitialAd mInterstitialAd;
 
     private static String getAuthority(final Context appContext) throws PackageManager.NameNotFoundException {
         final ComponentName componentName = new ComponentName(appContext, "StickerContentProvider");
 
-//        String string = context.getString(R.string.)
+
         String authority = componentName.getPackageName() + ".stickercontentprovider";
         return authority;
     }
@@ -107,10 +115,52 @@ public class StickerContentProvider extends ContentProvider {
         }
         AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority).appendPath(StickerContentProvider.METADATA).build();
 
-        // final String authority = BuildConfig.CONTENT_PROVIDER_AUTHORITY;
-//        if (!authority.startsWith(Objects.requireNonNull(getContext()).getPackageName())) {
-//            throw new IllegalStateException("your authority (" + authority + ") for the content provider should start with your package name: " + getContext().getPackageName());
-//        }
+       //--------------------------Interstitial ad-------------------------
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        mInterstitialAd = interstitialAd;
+                        Log.i(TAG, "onAdLoaded");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        Log.i(TAG, loadAdError.getMessage());
+                        mInterstitialAd = null;
+                    }
+                });
+        //---------------Interstitial ad: Set the FullScreenContentCallback----------
+        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                // Called when fullscreen content is dismissed.
+                Log.d("TAG", "The ad was dismissed.");
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                // Called when fullscreen content failed to show.
+                Log.d("TAG", "The ad failed to show.");
+            }
+
+            @Override
+            public void onAdShowedFullScreenContent() {
+                // Called when fullscreen content is shown.
+                // Make sure to set your reference to null so you don't
+                // show it a second time.
+                mInterstitialAd = null;
+                Log.d("TAG", "The ad was shown.");
+            }
+        });
+
+
+        //----------------------------------------------------------------------------
         Log.i(TAG, "...final String authority = " );
         //the call to get the metadata for the sticker packs.
         MATCHER.addURI(authority, METADATA, METADATA_CODE);
@@ -134,6 +184,11 @@ public class StickerContentProvider extends ContentProvider {
         return true;
     }
 
+    //-------------------getter of the Interstitial ad----------------------
+    public InterstitialAd getInterstisialAd() {
+        return mInterstitialAd;
+    }
+    //--------------------------------------------------------------------------------------------
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
@@ -151,6 +206,7 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
+    //----------------------------------------------------------------------------
     @Nullable
     @Override
     public AssetFileDescriptor openAssetFile(@NonNull Uri uri, @NonNull String mode) {
@@ -162,7 +218,7 @@ public class StickerContentProvider extends ContentProvider {
         return null;
     }
 
-
+    //----------------------------------------------------------------------------
     @Override
     public String getType(@NonNull Uri uri) {
         final int matchCode = MATCHER.match(uri);
@@ -187,6 +243,7 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
+    //-----------------------------------------------------------------------
     private synchronized void readContentFile(@NonNull Context context) {
         Log.i(TAG, "synchronized void readContentFile" );
         AssetManager manager = context.getAssets();
@@ -198,6 +255,7 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
+    //-------------------------------------------------------------------
     private List<StickerPack> getStickerPackList() {
         Log.i(TAG, "List<StickerPack> getStickerPackList()" );
         if (stickerPackList == null) {
@@ -206,11 +264,13 @@ public class StickerContentProvider extends ContentProvider {
         return stickerPackList;
     }
 
+    //-------------------------------------------------------------------
     private Cursor getPackForAllStickerPacks(@NonNull Uri uri) {
         Log.i(TAG, "Cursor getPackForAllStickerPacks" );
         return getStickerPackInfo(uri, getStickerPackList());
     }
 
+    //--------------------------------------------------------------------
     private Cursor getCursorForSingleStickerPack(@NonNull Uri uri) {
         final String identifier = uri.getLastPathSegment();
         Log.i(TAG, "Cursor getCursorForSingleStickerPack" );
@@ -223,6 +283,7 @@ public class StickerContentProvider extends ContentProvider {
         return getStickerPackInfo(uri, new ArrayList<>());
     }
 
+    //--------------------------------------------------------------------------------
     @NonNull
     private Cursor getStickerPackInfo(@NonNull Uri uri, @NonNull List<StickerPack> stickerPackList) {
 
@@ -263,6 +324,7 @@ public class StickerContentProvider extends ContentProvider {
         return cursor;
     }
 
+    //----------------------------------------------------------------------------------------
     @NonNull
     private Cursor getStickersForAStickerPack(@NonNull Uri uri) {
 
@@ -280,6 +342,7 @@ public class StickerContentProvider extends ContentProvider {
         return cursor;
     }
 
+    //------------------------------------------------------------------------------------
     private AssetFileDescriptor getImageAsset(Uri uri) throws IllegalArgumentException {
 
         Log.i(TAG, "AssetFileDescriptor getImageAsset" );
@@ -313,6 +376,7 @@ public class StickerContentProvider extends ContentProvider {
         return null;
     }
 
+    //--------------------------------------------------------------------------------------------
     private AssetFileDescriptor fetchFile(@NonNull Uri uri, @NonNull AssetManager am, @NonNull String fileName, @NonNull String identifier) {
 
         Log.i(TAG, "AssetFileDescriptor fetchFile" );
@@ -325,19 +389,21 @@ public class StickerContentProvider extends ContentProvider {
         }
     }
 
-
+    //----------------------------------------------------------------------------
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, String[] selectionArgs) {
         Log.i(TAG, "public int delete(@NonNull Uri uri," );
         throw new UnsupportedOperationException("Not supported");
     }
 
+    //----------------------------------------------------------------------------
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
         Log.i(TAG, "Uri insert(" );
         throw new UnsupportedOperationException("Not supported");
     }
 
+    //----------------------------------------------------------------------------
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
