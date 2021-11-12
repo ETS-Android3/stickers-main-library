@@ -47,6 +47,9 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 public class StickerContentProvider extends ContentProvider {
 
 
+    private static InterstitialAd mInterstitialAd;
+
+
     private final String TAG = "StickerContentProvider";
     /**
      * Do not change the strings listed below, as these are used by WhatsApp. And changing these will break the interface between sticker app and WhatsApp.
@@ -95,7 +98,7 @@ public class StickerContentProvider extends ContentProvider {
     private static final int STICKER_PACK_TRAY_ICON_CODE = 5;
 
     private List<StickerPack> stickerPackList;
-    private InterstitialAd mInterstitialAd;
+
 
     private static String getAuthority(final Context appContext) throws PackageManager.NameNotFoundException {
         final ComponentName componentName = new ComponentName(appContext, "StickerContentProvider");
@@ -115,50 +118,10 @@ public class StickerContentProvider extends ContentProvider {
         }
         AUTHORITY_URI = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority).appendPath(StickerContentProvider.METADATA).build();
 
+
        //--------------------------Interstitial ad-------------------------
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
-                        Log.i(TAG, "onAdLoaded");
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        Log.i(TAG, loadAdError.getMessage());
-                        mInterstitialAd = null;
-                    }
-                });
-        //---------------Interstitial ad: Set the FullScreenContentCallback----------
-        mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
-            @Override
-            public void onAdDismissedFullScreenContent() {
-                // Called when fullscreen content is dismissed.
-                Log.d("TAG", "The ad was dismissed.");
-            }
-
-            @Override
-            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                // Called when fullscreen content failed to show.
-                Log.d("TAG", "The ad failed to show.");
-            }
-
-            @Override
-            public void onAdShowedFullScreenContent() {
-                // Called when fullscreen content is shown.
-                // Make sure to set your reference to null so you don't
-                // show it a second time.
-                mInterstitialAd = null;
-                Log.d("TAG", "The ad was shown.");
-            }
-        });
-
+        loadInterstitialAd(getContext());
+//
 
         //----------------------------------------------------------------------------
         Log.i(TAG, "...final String authority = " );
@@ -184,8 +147,36 @@ public class StickerContentProvider extends ContentProvider {
         return true;
     }
 
+    //-------------------load the Interstitial ad----------------------------
+    public static void loadInterstitialAd(Context context){
+        // Create a full screen content callback.
+        FullScreenContentCallback fullScreenContentCallback = new FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                mInterstitialAd = null;
+            }
+        };
+
+
+        InterstitialAd.load(
+                context,
+                "ca-app-pub-3940256099942544/1033173712",
+                new AdRequest.Builder().build(),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd ad) {
+                        mInterstitialAd = ad;
+                        mInterstitialAd.setFullScreenContentCallback(fullScreenContentCallback);
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                        // Code to be executed when an ad request fails.
+                    }
+                });
+    }
     //-------------------getter of the Interstitial ad----------------------
-    public InterstitialAd getInterstisialAd() {
+    public static InterstitialAd getInterstisialAd() {
         return mInterstitialAd;
     }
     //--------------------------------------------------------------------------------------------
