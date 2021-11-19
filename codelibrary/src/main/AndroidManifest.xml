@@ -48,6 +48,7 @@
 
         <provider
             android:name=".StickerContentProvider"
+            android:enabled="false"
             android:authorities="${applicationId}.stickercontentprovider"
             android:enabled="true"
             android:exported="true"
